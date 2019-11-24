@@ -23,7 +23,7 @@ var index;
 var slot;
 var bookingIndex;
 var pagenumber;
-let data = ["SLOT ID", "CAR NUMBER", "CHECKED IN", "CHECKED OUT", "TOTAL INCOME"];
+let tableHeaders = ["SLOT ID", "CAR NUMBER", "CHECKED IN", "CHECKED OUT", "TOTAL INCOME"];
 var bookings = []
 
 //invoke-function for rendering table view while loading the app
@@ -500,7 +500,7 @@ var tableComponents = (function() {
             <span>TOTAL INCOME:${earning}</span>
             `
         document.getElementById("income").innerHTML = text;
-        generateTableHead(table, data);
+        generateTableHead(table, tableHeaders);
         generateTableBody(table, filteredList);
     }
 
@@ -533,7 +533,7 @@ var tableComponents = (function() {
         filteredList = covertToReadableDate(filteredList)
         document.getElementById("income").innerHTML = text;
 
-        generateTableHead(table, data);
+        generateTableHead(table, tableHeaders);
         generateTableBody(table, filteredList);
         debugger
     }
@@ -576,7 +576,7 @@ var tableComponents = (function() {
         }
         filteredList = bookings.slice(start, end);
         filteredList = covertToReadableDate(filteredList)
-        generateTableHead(table, data);
+        generateTableHead(table, tableHeaders);
         generateTableBody(table, filteredList);
     }
 
@@ -594,7 +594,7 @@ var tableComponents = (function() {
         }
         filteredList = bookings.slice(start, end);
         filteredList = covertToReadableDate(filteredList)
-        generateTableHead(table, data);
+        generateTableHead(table, tableHeaders);
         generateTableBody(table, filteredList);
     }
 
