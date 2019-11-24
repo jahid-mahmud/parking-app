@@ -199,6 +199,13 @@ input[type=submit] {
     padding: 10px;
 }
 
+.grid-container4 {
+    display: grid;
+    grid-row-gap: 16px;
+    grid-template-columns: auto auto auto auto;
+    padding: 10px;
+}
+
 .grid-container2 {
     display: grid;
     grid-template-columns: auto auto;
@@ -207,6 +214,7 @@ input[type=submit] {
 .grid-container3 {
     display: grid;
     grid-template-columns: 75% auto;
+    margin-left: 20px;
 }
 
 .grid-item {
@@ -219,11 +227,10 @@ input[type=submit] {
 
 .grid-item3 {
     height: 200px;
-    width: 240px;
+    width: 280px;
     background-color: #34c7c0;
-    padding: 20px;
+    padding: 40px;
     text-align: center;
-    margin: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
 }
 
