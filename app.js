@@ -25,11 +25,14 @@ var bookingIndex;
 var pagenumber;
 let data = ["SLOT ID", "CAR NUMBER", "CHECKED IN", "CHECKED OUT", "TOTAL INCOME"];
 var bookings = []
+
+//invoke-function for rendering table view while loading the app
 $(function() {
     gotoTableTab()
 
 })
 
+//is called for gateman
 function gotoGateManTab() {
     gatemanTab.style.display = "initial";
     adminTab.style.display = "none";
@@ -37,6 +40,7 @@ function gotoGateManTab() {
     showGateManView();
 }
 
+//is called for admin
 function gotoAdminTab() {
     gatemanTab.style.display = "none";
     adminTab.style.display = "initial";
@@ -44,6 +48,7 @@ function gotoAdminTab() {
     showAdminView()
 }
 
+//is called for table content
 function gotoTableTab() {
     gatemanTab.style.display = "none";
     adminTab.style.display = "none";
@@ -51,41 +56,53 @@ function gotoTableTab() {
     showTable()
 }
 
+//generates admin view
+function showAdminView() {
+    viewFacilties.adminView()
+}
+
+//modal for adding new slot
 function opneAddSlotModal() {
     addSlotButton.style.display = "none";
     AddSlotModal.style.display = "block";
     saveNewSlotButton.style.display = "initial";
 }
+
+//closes adding modal
 closeAddSlotModal.onclick = function() {
     AddSlotModal.style.display = "none";
     addSlotButton.style.display = "block";
 }
+
+//closes booking slot modal
 closebookSlotModal.onclick = function() {
     bookSlotModal.style.display = "none";
 }
+
+//closes report modal
 closeReportModal.onclick = function() {
     reportModal.style.display = "none";
 }
+
+//closes slot editing modal
 closeEditSlotModal.onclick = function() {
     editSlotModal.style.display = "none"
     addSlotButton.style.display = "block";
 }
 
+//saves newly created modal 
 function addNewSlot() {
     adminResponsibilities.saveNewSlot()
 }
 
-function showAdminView() {
-    viewFacilties.adminView()
-        // makedroppable()
-}
-
+//delete a slot 
 function deleteSlot(event) {
     index = parseInt(event.target.dataset.index);
     adminResponsibilities.deleteASlot(index)
     viewFacilties.adminView()
 }
 
+//edit a slot
 function editSlot(event) {
     slot = JSON.parse(event.target.dataset.slot);
     index = parseInt(event.target.dataset.index);
@@ -95,6 +112,7 @@ function editSlot(event) {
     editRate.value = slot.slotRate
 }
 
+//saves edited slot
 function saveEditedSlot() {
     adminResponsibilities.editASlot(index)
     AddSlotModal.style.display = "none";
@@ -102,27 +120,31 @@ function saveEditedSlot() {
     viewFacilties.adminView()
 }
 
+//closes opened modal
 function discard() {
     closeAddSlotModal.onclick()
     closeEditSlotModal.onclick();
     closebookSlotModal.onclick()
 }
 
+//generates gateman view
 function showGateManView() {
     viewFacilties.gateManView()
 }
 
+//opens booking modal while gateman try to book a slot
 function bookSlot(event) {
     bookSlotModal.style.display = "block";
     bookingIndex = parseInt(event.target.dataset.index)
     slot = JSON.parse(event.target.dataset.lot);
 }
 
-
+//books a slot with car number and time
 function saveBookedSlot() {
     gateManResponsibilities.bookASlot(bookingIndex, slot)
 }
 
+//called when checks out and generates report
 function deBookSlot(event) {
     bookingIndex = parseInt(event.target.dataset.index)
     slot = JSON.parse(event.target.dataset.lot);
@@ -130,26 +152,31 @@ function deBookSlot(event) {
     viewFacilties.gateManView()
 }
 
+//generating table view
 function showTable() {
     pagenumber = 1;
     tableComponents.generateTable()
 }
 
+//goes to the next page
 function next() {
     var filteredList = [];
     tableComponents.goNext();
 }
 
+//goes to the previous page
 function prev() {
     tableComponents.goPrev();
 }
 
+//filter the table with a search value
 function filter() {
     var searchKey = document.getElementById("searchKey").value
     tableComponents.searchList(searchKey)
 }
 
 
+//generates admin view and gateman view
 var viewFacilties = (function() {
     var slots = [];
 
@@ -244,12 +271,6 @@ var viewFacilties = (function() {
         text += '</div>'
 
         document.getElementById("allSlotsForAdmin").innerHTML = text
-            // slots.forEach(slot => {
-            //     // dragElement(document.getElementById(slot.slotId));
-            //     console.log("elmnt", document.getElementById(slot.slotId))
-            //     elmnt = document.getElementById(slot.slotId);
-            //     dragElement(elmnt)
-            // })
 
     }
 
@@ -260,13 +281,14 @@ var viewFacilties = (function() {
     };
 })();
 
-
+//responsibilities of an admin like creating or editing or deleting a slot
 var adminResponsibilities = (function() {
     var slots = []
     if ("slots" in localStorage) {
         slots = [...JSON.parse(localStorage.getItem("slots"))]
     }
 
+    //eavluates new created slot and saves to the storage
     var saveNewSlot = function() {
         var x = slotNumber.value;
         var y = rate.value;
@@ -307,11 +329,13 @@ var adminResponsibilities = (function() {
         viewFacilties.adminView()
     }
 
+    //deletes a particular slot
     var deleteASlot = function(index) {
         slots.splice(index, 1);
         localStorage.setItem("slots", JSON.stringify(slots));
     }
 
+    //eavluates edited and saves to the storage
     var editASlot = function(index) {
         debugger;
         var x = editSlotNumber.value;
@@ -349,12 +373,14 @@ var adminResponsibilities = (function() {
     };
 })();
 
+//responsibilities of a gateman like book and debook a slot and generating report of a booking
 var gateManResponsibilities = (function() {
     var slots = []
     if ("slots" in localStorage) {
         slots = [...JSON.parse(localStorage.getItem("slots"))]
     }
 
+    //evaluates car number and bookes the slot starting form current time(GMT+6)
     var bookASlot = function(index, slot) {
 
         if (carNumber.value == "") {
@@ -376,6 +402,7 @@ var gateManResponsibilities = (function() {
         viewFacilties.gateManView()
     }
 
+    //checks out for a slot 
     var debookASlot = function(bookingIndex, slot) {
         var bookings = []
         var date = new Date();
@@ -405,6 +432,7 @@ var gateManResponsibilities = (function() {
         generateReport(date, slot.date, slot.slotRate, totalCost);
     }
 
+    //calculates difference between checkin time and checkout time
     function diff_minutes(dt2, dt) {
         dt1 = new Date(dt)
         var diff = (dt2.getTime() - dt1.getTime()) / 1000;
@@ -412,6 +440,7 @@ var gateManResponsibilities = (function() {
         return Math.abs(Math.round(diff));
     }
 
+    //generates report with checkin date,checkout date and total cost
     function generateReport(checkoutDate, checkinDate, rate, cost) {
         checkoutDate = new Date(checkoutDate).toLocaleString();
         checkinDate = new Date(checkinDate).toLocaleString();
@@ -440,10 +469,13 @@ var gateManResponsibilities = (function() {
 
 })()
 
+//table components for generating table,searching and paging
 var tableComponents = (function() {
     var earning;
     var filteredList = [];
     var bookings = []
+
+    //generates the table with initial header and at most first 10 data
     var generateTable = function() {
         earning = 0;
         pagenumber = 1;
@@ -472,30 +504,27 @@ var tableComponents = (function() {
         generateTableBody(table, filteredList);
     }
 
+    //converts to read-able dates(local-date)
     function covertToReadableDate(arr) {
         arr.forEach(data => {
             data.checkOutTime = new Date(data.checkOutTime).toLocaleString()
             data.incomingTime = new Date(data.incomingTime).toLocaleString()
         })
         return arr
-
     }
+
+    //search for a search key in the database and calculate income from the slot
     var searchList = function(key) {
         document.getElementById("income").innerHTM = ""
         var earning = 0;
         filteredList = [];
         table.innerHTML = ""
         bookings.forEach((booking) => {
-                if (booking.slotId == key) {
-                    earning += booking.totalCost
-                    filteredList.push(booking)
-                }
-            })
-            // if (filteredList.length) {
-            //     filteredList.forEach(booking => {
-            //         earning += booking.totalCost
-            //     })
-            // }
+            if (booking.slotId == key) {
+                earning += booking.totalCost
+                filteredList.push(booking)
+            }
+        })
 
         var text =
             `
@@ -509,6 +538,7 @@ var tableComponents = (function() {
         debugger
     }
 
+    //generates table headers
     var generateTableHead = function(table, data) {
         let thead = table.createTHead();
         let row = thead.insertRow();
@@ -519,6 +549,8 @@ var tableComponents = (function() {
             row.appendChild(th);
         }
     }
+
+    //generates table body with given data array
     var generateTableBody = function(table, data) {
         for (let element of data) {
             let row = table.insertRow();
@@ -530,6 +562,7 @@ var tableComponents = (function() {
         }
     }
 
+    //go next page of the table
     var goNext = function() {
         if (bookings.length < 11 || pagenumber > (bookings.length / 10)) {
             return
@@ -537,7 +570,7 @@ var tableComponents = (function() {
         table.innerHTML = ""
         pagenumber += 1;
         var start = (pagenumber - 1) * 10;
-        var end = (pagenumber * 10) - 1;
+        var end = (pagenumber * 10);
         if (end > bookings.length) {
             end = bookings.length;
         }
@@ -546,6 +579,8 @@ var tableComponents = (function() {
         generateTableHead(table, data);
         generateTableBody(table, filteredList);
     }
+
+    //go previous page of the table
     var goPrev = function() {
         if (pagenumber == 1) {
             return;
@@ -801,6 +836,9 @@ var tableComponents = (function() {
 //     });
 // };
 
+
+/*dropping a slot inside details division and generating information of that slot
+jquery was used for this*/
 function makedroppable(event) {
     bookingIndex = parseInt(event.target.dataset.divid)
     var myObject = document.getElementById(bookingIndex);

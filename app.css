@@ -84,7 +84,7 @@ body {
 }
 
 .warn {
-    background-color: #eea236;
+    background-color: #e8a74c;
 }
 
 .primary {
@@ -92,7 +92,7 @@ body {
 }
 
 .danger {
-    background-color: #d43f3a;
+    background-color: #da716e;
 }
 
 
@@ -290,8 +290,9 @@ input {
 
 .summeryHeader {
     height: 40px;
-    background-color: #34c7c0;
-    color: lavender;
+    /* background-color: #34c7c0; */
+    font-weight: bold;
+    margin: 10px;
 }
 
 #d2 {
