@@ -18,6 +18,7 @@ var editSlotModal = document.getElementById("editSlotModal");
 var closeEditSlotModal = document.getElementById("closeEditSlotModal");
 var editSlotNumber = document.getElementById("editSlotNumber");
 var editRate = document.getElementById("editRate");
+var infodiv = document.getElementById("infoDiv");
 var slots = [];
 var index;
 var slot;
@@ -99,7 +100,6 @@ function addNewSlot() {
 function deleteSlot(event) {
     index = parseInt(event.target.dataset.index);
     adminResponsibilities.deleteASlot(index)
-    viewFacilties.adminView()
 }
 
 //edit a slot
@@ -160,7 +160,6 @@ function showTable() {
 
 //goes to the next page
 function next() {
-    var filteredList = [];
     tableComponents.goNext();
 }
 
@@ -178,23 +177,22 @@ function filter() {
 
 //generates admin view and gateman view
 var viewFacilties = (function() {
-    var slots = [];
-
+    var slots = [];  
     var gateManView = function() {
+        var hour;
+        var minutes
+        var strSlot 
+        var text=""
         if ("slots" in localStorage) {
             slots = [...JSON.parse(localStorage.getItem("slots"))]
         }
 
-        var text = '<div class="grid-container">'
+        text = '<div class="grid-container">'
         slots.map((slot, index) => {
-            var time = new Date(slot.date).toLocaleTimeString('en-GB', {
-                hour: "numeric",
-                minute: "numeric"
-            });
-            var hour = new Date(slot.date).getHours()
+            hour= new Date(slot.date).getHours()
             if (hour > 12) {
                 hour = hour - 12;
-                var minutes = new Date(slot.date).getMinutes()
+                 minutes = new Date(slot.date).getMinutes()
                 if (minutes < 10) {
                     minutes = "0" + minutes + " PM"
                 } else {
@@ -202,12 +200,12 @@ var viewFacilties = (function() {
                 }
 
             } else {
-                var minutes = new Date(slot.date).getMinutes()
+                minutes = new Date(slot.date).getMinutes()
                 minutes = minutes + " AM"
             }
 
 
-            var strSlot = JSON.stringify(slot);
+            strSlot = JSON.stringify(slot);
             if (!slot.isBooked) {
                 text +=
                     `
@@ -218,7 +216,7 @@ var viewFacilties = (function() {
                       <div style="margin:10px">
                             <span>Slot Rate:${slot.slotRate} Per Hour</span>
                       </div>
-                      <button class="btn primary" style="float: left;margin-top:40px" id="deleteSlot" onclick="bookSlot(event) " data-index=${index} data-lot=${strSlot}>BOOK</button>
+                      <button class="btn primary" style="float: left;margin-top:40px" id="deleteSlot" onclick="bookSlot(event) " data-index=${index} data-lot='${strSlot}'>BOOK</button>
                     </div>
                 `
             } else {
@@ -234,7 +232,7 @@ var viewFacilties = (function() {
                       <div style="margin:10px">
                             <span>Parked At :  ${hour} : ${minutes} </span>
                       </div>
-                      <button class="btn danger" style="float: left;margin-top:12px" id="deleteSlot" onclick="deBookSlot(event)" data-index=${index} data-lot=${strSlot}>DE-BOOK</button>
+                      <button class="btn danger" style="float: left;margin-top:12px" id="deleteSlot" onclick="deBookSlot(event)" data-index=${index} data-lot='${strSlot}'>DE-BOOK</button>
                     </div>
                 `
 
@@ -245,14 +243,17 @@ var viewFacilties = (function() {
 
         document.getElementById("allSlotsForGateMan").innerHTML = text
     }
+
     var adminView = function() {
+        var strSlot
+        var text =""
         if ("slots" in localStorage) {
             slots = [...JSON.parse(localStorage.getItem("slots"))]
         }
 
-        var text = '<div class="grid-container4" >'
+        text = '<div class="grid-container4" >'
         slots.map((slot, index) => {
-            var strSlot = JSON.stringify(slot);
+            strSlot = JSON.stringify(slot);
             text +=
                 `
                     <div class="grid-item3" id="${slot.slotId}" onmousedown=" makedroppable(event)" data-divid=${slot.slotId} >
@@ -283,33 +284,48 @@ var viewFacilties = (function() {
 
 //responsibilities of an admin like creating or editing or deleting a slot
 var adminResponsibilities = (function() {
-    var slots = []
+    var slots = [];
     if ("slots" in localStorage) {
         slots = [...JSON.parse(localStorage.getItem("slots"))]
     }
 
     //eavluates new created slot and saves to the storage
     var saveNewSlot = function() {
-        var x = slotNumber.value;
-        var y = rate.value;
-        if (isNaN(x) || x < 1 || x > 200) {
-            alert("ID IS NOT VALID");
-            slotNumber.value = ""
+        var taken = false;
+        var newObj={}
+        var slotnumber = slotNumber.value;
+        var slotrate = rate.value;
+        if (isNaN(slotnumber) || slotnumber < 1 || slotnumber > 200) {
+            // debugger;
+            // var popup = document.getElementById("myPopup");
+            // popup.classList.toggle("show");
+            slotNumber.value="ID IS NOT CORRECT"
+            slotNumber.style.backgroundColor="#e88282"
+            setTimeout(function() { slotNumber.style.backgroundColor="#ffffff";slotNumber.value = "";slotNumber.focus()}, 1000);          
             return;
         }
-        if (isNaN(y) || y == "") {
-            alert("RATE IS NOT CORRECT");
-            rate.value = ""
+
+        if (isNaN(slotrate) || slotrate == "") {
+            rate.style.backgroundColor="#e88282"
+            rate.value="RATE IS EITHER NOT A NUMBER OR EMPTY"
+            setTimeout(function() { rate.style.backgroundColor="#ffffff" ; rate.value = "" ;rate.focus()}, 1000);           
             return;
         }
-        slots.forEach(slot => {
-            if (slot.slotId == x) {
-                alert("ID IS ALREADY TAKEN");
-                slotNumber.value = ""
-                return;
+
+        slots.forEach(slt => {
+            if (slt.slotId == slotnumber) {
+                taken = true
             }
         })
-        var newObj = {
+        
+        if (taken) {
+            slotNumber.style.backgroundColor="#e88282"
+            slotNumber.value="ID ALREADY TAKEN"
+            setTimeout(function() { slotNumber.style.backgroundColor="#ffffff";slotNumber.value = "";slotNumber.focus() }, 1000);
+            
+            return
+        }
+         newObj = {
             slotId: slotNumber.value,
             slotRate: rate.value,
             carNumber: "",
@@ -333,30 +349,40 @@ var adminResponsibilities = (function() {
     var deleteASlot = function(index) {
         slots.splice(index, 1);
         localStorage.setItem("slots", JSON.stringify(slots));
+        viewFacilties.adminView()
     }
 
     //eavluates edited and saves to the storage
     var editASlot = function(index) {
-        debugger;
-        var x = editSlotNumber.value;
-        var y = editRate.value;
-        if (isNaN(x) || x < 1 || x > 200) {
-            alert("ID IS NOT VALID");
-            editSlotNumber.value = ""
+        var taken = false;
+        var editNumber = editSlotNumber.value;
+        var edtRate = editRate.value;
+        if (isNaN(editNumber) || editNumber < 1 || editNumber > 200) {
+            editSlotNumber.style.backgroundColor="#e88282"
+            editSlotNumber.value="ID IS INVALID"
+            setTimeout(function() { editSlotNumber.style.backgroundColor="#ffffff";editSlotNumber.value = "";editSlotNumber.focus() }, 1000);
             return;
         }
-        if (isNaN(y) || y == "") {
-            alert("RATE IS NOT CORRECT");
-            editRate.value = ""
+        if (isNaN(edtRate) || edtRate == "") {
+            editRate.style.backgroundColor="#e88282"
+            editRate.value="ID IS INVALID"
+            setTimeout(function() { editRate.style.backgroundColor="#ffffff";editRate.value = "";editRate.focus() }, 1000);
             return;
         }
         slots.forEach(slot => {
-            if (slot.slotId == x) {
-                alert("ID IS ALREADY TAKEN");
-                editSlotNumber.value = ""
-                return;
+            if (slot.slotId == editNumber) {
+                taken = true
             }
         })
+        if (slot.slotId == editNumber) {
+            taken = false
+        }
+        if (taken) {
+            editSlotNumber.style.backgroundColor="#e88282"
+            editSlotNumber.value="ID IS ALREADY TAKEN"
+            setTimeout(function() { editSlotNumber.style.backgroundColor="#ffffff";editSlotNumber.value = ""; editSlotNumber.focus()}, 1000);
+            return;
+        }
         slots[index].slotId = editSlotNumber.value;
         slots[index].slotRate = editRate.value;
         localStorage.setItem("slots", JSON.stringify(slots))
@@ -376,20 +402,35 @@ var adminResponsibilities = (function() {
 //responsibilities of a gateman like book and debook a slot and generating report of a booking
 var gateManResponsibilities = (function() {
     var slots = []
+    var newObj={};
+    var regx1=/^([A-Z]){3}([-])([A-Z]){2}([-])\d...../;
+    var date 
+    var hour 
+    var minutes
+    // var regx1=new RegExp('([A-Z]){3}')
+    
     if ("slots" in localStorage) {
         slots = [...JSON.parse(localStorage.getItem("slots"))]
     }
 
     //evaluates car number and bookes the slot starting form current time(GMT+6)
     var bookASlot = function(index, slot) {
-
-        if (carNumber.value == "") {
-            alert("MUST PROVIDE CAR NUMBER");
+        var valid=false;
+        if ("slots" in localStorage) {
+            slots = [...JSON.parse(localStorage.getItem("slots"))]
+        }
+        if(regx1.test(carNumber.value)) {
+              valid=true;
+        }
+        if(!valid){
+            carNumber.style.backgroundColor="#e88282"
+            carNumber.value="CAR NUMBER IS NOT VALID"
+            setTimeout(function() { carNumber.style.backgroundColor="#ffffff";carNumber.value = "";carNumber.focus() }, 1000);
             return;
         }
-        var date = new Date();
-        var hour = date.getHours();
-        var minutes = date.getMinutes();
+        date = new Date();
+        hour = date.getHours();
+        minutes = date.getMinutes();
         slots[bookingIndex].isBooked = true;
         slots[bookingIndex].date = date;
         slots[bookingIndex].hour = hour;
@@ -404,14 +445,14 @@ var gateManResponsibilities = (function() {
 
     //checks out for a slot 
     var debookASlot = function(bookingIndex, slot) {
+        if ("slots" in localStorage) {
+            slots = [...JSON.parse(localStorage.getItem("slots"))]
+        }
         var bookings = []
         var date = new Date();
-        var hour = date.getHours();
-        var minutes = date.getMinutes();
-
         var timeDifference = diff_minutes(date, slot.date);
         var totalCost = ((timeDifference * parseInt(slot.slotRate)) / 60)
-        var newObj = {
+        newObj = {
             slotId: slot.slotId,
             carNumber: slot.carNumber,
             incomingTime: slot.date,
@@ -424,7 +465,7 @@ var gateManResponsibilities = (function() {
         slots[bookingIndex].minutes = "";
         slots[bookingIndex].carNumber = "";
         if ("bookings" in localStorage) {
-            var bookings = [...JSON.parse(localStorage.getItem("bookings"))]
+             bookings = [...JSON.parse(localStorage.getItem("bookings"))]
         }
         bookings.push(newObj);
         localStorage.setItem("bookings", JSON.stringify(bookings));
@@ -442,10 +483,11 @@ var gateManResponsibilities = (function() {
 
     //generates report with checkin date,checkout date and total cost
     function generateReport(checkoutDate, checkinDate, rate, cost) {
+        var text
         checkoutDate = new Date(checkoutDate).toLocaleString();
         checkinDate = new Date(checkinDate).toLocaleString();
         reportModal.style.display = "block"
-        var text =
+        text =
             `
             <div>
              <div class="summeryHeader">
@@ -480,6 +522,7 @@ var tableComponents = (function() {
         earning = 0;
         pagenumber = 1;
         table.innerHTML = ""
+        var text
         if ("bookings" in localStorage) {
             bookings = [...JSON.parse(localStorage.getItem("bookings"))]
         }
@@ -495,7 +538,7 @@ var tableComponents = (function() {
             filteredList = bookings
         }
         filteredList = covertToReadableDate(filteredList);
-        var text =
+        text =
             `
             <span>TOTAL INCOME:${earning}</span>
             `
@@ -515,18 +558,20 @@ var tableComponents = (function() {
 
     //search for a search key in the database and calculate income from the slot
     var searchList = function(key) {
-        document.getElementById("income").innerHTM = ""
+        var regx=new RegExp(key);
         var earning = 0;
+        var text
+        document.getElementById("income").innerHTM = ""
         filteredList = [];
         table.innerHTML = ""
         bookings.forEach((booking) => {
-            if (booking.slotId == key) {
+            if (regx.test(booking.slotId)) {
                 earning += booking.totalCost
                 filteredList.push(booking)
             }
         })
 
-        var text =
+        text =
             `
             <span>TOTAL INCOME:${earning}</span>
             `
@@ -535,7 +580,6 @@ var tableComponents = (function() {
 
         generateTableHead(table, tableHeaders);
         generateTableBody(table, filteredList);
-        debugger
     }
 
     //generates table headers
@@ -564,13 +608,15 @@ var tableComponents = (function() {
 
     //go next page of the table
     var goNext = function() {
+        var start
+        var end 
         if (bookings.length < 11 || pagenumber > (bookings.length / 10)) {
             return
         }
         table.innerHTML = ""
         pagenumber += 1;
-        var start = (pagenumber - 1) * 10;
-        var end = (pagenumber * 10);
+        start = (pagenumber - 1) * 10;
+        end = (pagenumber * 10);
         if (end > bookings.length) {
             end = bookings.length;
         }
@@ -582,13 +628,15 @@ var tableComponents = (function() {
 
     //go previous page of the table
     var goPrev = function() {
+        var start
+        var end
         if (pagenumber == 1) {
             return;
         }
         table.innerHTML = ""
         pagenumber = pagenumber - 1;
-        var start = (pagenumber - 1) * 10;
-        var end = (pagenumber * 10);
+        start = (pagenumber - 1) * 10;
+        end = (pagenumber * 10);
         if (start < 0) {
             start = 0;
         }
@@ -611,231 +659,6 @@ var tableComponents = (function() {
 })()
 
 
-// function movable(event) {
-//     var initialTop;
-//     var initialLeft;
-//     let elemBelow;
-//     var currentElement;
-//     var prevElement = "";
-//     var bookings = []
-//     var filteredList = []
-//     var slots = []
-//     var newList = []
-//     bookingIndex = parseInt(event.target.dataset.divid)
-//     var myObject = document.getElementById(bookingIndex);
-//     if ("bookings" in localStorage) {
-//         bookings = [...JSON.parse(localStorage.getItem("bookings"))]
-//     }
-//     bookings.forEach(booking => {
-//         if (booking.slotId == bookingIndex) {
-//             filteredList.push(booking);
-//         }
-//     })
-//     if ("slots" in localStorage) {
-//         slots = [...JSON.parse(localStorage.getItem("slots"))]
-//     }
-//     slots.forEach(slot => {
-//         if (slot.slotId != bookingIndex) {
-//             newList.push(slot)
-//         }
-//     })
-
-
-
-//     console.log(myObject);
-//     var offsets = document.getElementById(bookingIndex).getBoundingClientRect();
-//     console.log("elmnt", document.getElementById(bookingIndex))
-//     var initialTop = offsets.top;
-//     var initialLeft = offsets.left;
-//     let shiftX = event.clientX - myObject.getBoundingClientRect().left;
-//     let shiftY = event.clientY - myObject.getBoundingClientRect().top;
-//     console.log("initial position", initialTop, initialLeft)
-
-//     myObject.style.position = 'absolute';
-//     myObject.style.zIndex = 1000;
-//     document.body.append(myObject);
-
-
-//     moveAt(event.pageX, event.pageY);
-
-//     function moveAt(pageX, pageY) {
-//         myObject.style.left = pageX - shiftX + 'px';
-//         myObject.style.top = pageY - shiftY + 'px';
-//     }
-
-//     function onMouseMove(event) {
-//         moveAt(event.pageX, event.pageY);
-//         myObject.hidden = true;
-//         elemBelow = document.elementFromPoint(event.clientX, event.clientY);
-//         prevElement = elemBelow;
-//         // console.log("prev", prevElement);
-//         if (!prevElement.id) {
-//             prevElement = prevElement.parentElement;
-
-
-//         }
-//         console.log("prev2", prevElement);
-//         myObject.hidden = false;
-//         if (!elemBelow) return;
-//     }
-
-//     document.addEventListener('mousemove', onMouseMove);
-//     myObject.onmouseup = function () {
-//         var offsets = document.getElementById(bookingIndex).getBoundingClientRect();
-//         var top = offsets.top;
-//         var left = offsets.left;
-//         console.log("top-left dropdiv", top, left);
-//         if (top > 115 && top < 215 && left > 1500 && left < 1560) {
-//             debugger;
-//             var cost = 0
-//             myObject.style.display = "none";
-//             if (prevElement.id) {
-//                 prevElement.style.display = "none"
-//             }
-//             generateInfodiv(filteredList, bookingIndex);
-//             // myObject.style.top = initialTop;
-//             // myObject.style.left = initialLeft;
-//             // myObject.style.backgroundColor = "#455675"
-//             // myObject.style.color = "#fff"
-//             // text = '<div>'
-//             // text += "<div>Car numbers:</div>"
-//             // filteredList.forEach(list => {
-//             //     cost += list.totalCost
-//             //     text +=
-//             //         `
-
-//             //     <div>${list.carNumber}</div>
-//             //     `
-//             // })
-//             // text += `<div>total income:${cost}</div>`
-//             // text += "</div>"
-//             // myObject.innerHTML = text
-//         }
-//         document.removeEventListener('mousemove', onMouseMove);
-//         document.getElementById("allSlotsForAdmin").innerHTML = ""
-//         gv(newList)
-//         // moveDiv()
-
-//     };
-
-// };
-// function returnToOriginalPosition(elmnt) {
-//     debugger;
-//     elmnt.style.zIndex = 0;
-//     elmnt.style.top = initialTop;
-//     elmnt.style.left = initialLeft;
-//     elmnt.style.backgroundColor = "#221345"
-// }
-
-// function enterDroppable(elem) {
-//     elem.style.background = 'pink';
-// }
-
-// function leaveDroppable(elem) {
-//     elem.style.background = '';
-// }
-// if (bookingIndex) {
-//     bookingIndex.ondragstart = function () {
-//         return false;
-//     };
-
-// }
-// function generateInfodiv(filteredList, bookingIndex) {
-//     debugger;
-//     var cost = 0;
-//     var infodiv = document.getElementById("infoDiv");
-//     infodiv.innerHTML = "";
-//     var text = "";
-//     text = '<div style="margin: 40px;">'
-//     text += `<div>SLOT NUMBER:${bookingIndex}</div>`
-//     text += "<div>Car numbers:</div>"
-//     filteredList.forEach(list => {
-//         cost += list.totalCost
-//         text +=
-//             `
-
-//                 <div>${list.carNumber}</div>
-//                 `
-//     })
-//     text += `<div>total income:${cost}</div>`
-//     text += "</div>"
-//     infodiv.innerHTML = text;
-// }
-
-// function gv(slots) {
-//     var text = '<div class="grid-container" >'
-//     slots.map((slot, index) => {
-//         var strSlot = JSON.stringify(slot);
-//         text +=
-//             `
-//             <div class="grid-item3" id="${slot.slotId}" onmousedown="movable(event)" data-divId=${slot.slotId} >
-//               <div style="margin:10px">
-//                     <span>Slot Number:${slot.slotId}</span>
-//               </div>
-//               <div style="margin:10px">
-//                     <span>Slot Rate:${slot.slotRate} Per Hour</span>
-//               </div>
-//               <button class="btn danger" style="float: left;" id="deleteSlot" onclick="deleteSlot(event)" data-slot=${strSlot} data-index=${index}>DELETE</button>
-//               <button class="btn warn" id="editSlot" style="float: right;" data-slot=${strSlot} data-index=${index}
-//               onclick="editSlot(event)">EDIT</button>
-//             </div>
-//         `
-//     })
-//     text += '</div>'
-
-//     document.getElementById("allSlotsForAdmin").innerHTML = text
-
-// }
-
-// function moveDiv() {
-//     document.getElementById("dhon").innerHTML = ""
-
-//     var text = ""
-//     text +=
-//         `
-//             <div class="grid-item3"  id="d2" >
-//               <div style="margin:10px">
-//                     <span>Slot Number</span>
-//               </div>
-//               <div style="margin:10px">
-//                     <span>Slot Rate Per Hour</span>
-//               </div>
-//               <button class="btn danger" style="float: left;" id="deleteSlot" onclick="deleteSlot(event)" </button>
-//               <button class="btn warn" id="editSlot" style="float: right;"
-//               onclick="editSlot(event)">EDIT</button>
-//             </div>
-//         `
-
-
-//     document.getElementById("dhon").innerHTML = text
-// }
-// function makedroppable() {
-//     // debugger;
-//     // bookingIndex = parseInt(event.target.dataset.divid)
-//     // var elmnt = `"` + `${bookingindex}` + `"`
-//     // console.log("elmnt", elmnt);
-//     $("#12").draggable({
-//         revert: "valid",
-//         drag: function (event, ui) {
-//             console.log("hi")
-//         }
-//     });
-//     // $("#s2").draggable({
-//     //     revert: "invalid",
-//     //     drag: function (event, ui) {
-//     //         $("#info").html("<font color=red>This square will go back to it`s original position, unless it`s dropped in target zone.</font> ");
-//     //     }
-//     // });
-//     $("#12").droppable({
-//         drop: function (event, ui) {
-//             console.log("hlw")
-//         },
-//         out: function (event, ui) {
-
-//         }
-//     });
-// };
-
 
 /*dropping a slot inside details division and generating information of that slot
 jquery was used for this*/
@@ -843,7 +666,7 @@ function makedroppable(event) {
     bookingIndex = parseInt(event.target.dataset.divid)
     var myObject = document.getElementById(bookingIndex);
     $(myObject).draggable({
-        revert: "valid",
+        revert: "invalid",
         drag: function(event, ui) {
             $("#info").html("<font color=red>This square will go back to it`s original position once it`s dropped in target zone. </font>");
         }
@@ -851,11 +674,12 @@ function makedroppable(event) {
     $("#infoDiv").droppable({
         drop: function(event, ui) {
             var cost = 0;
-            var infodiv = document.getElementById("infoDiv");
-            infodiv.innerHTML = "";
+            $(myObject).draggable({
+                revert: "valid"})           
             var text = "";
             var bookings = []
             var filteredList = []
+            infodiv.innerHTML = "";
             if ("bookings" in localStorage) {
                 bookings = [...JSON.parse(localStorage.getItem("bookings"))]
             }
@@ -864,7 +688,6 @@ function makedroppable(event) {
                     filteredList.push(booking);
                 }
             })
-            console.log("kajhsdkjhasd")
 
             text = '<div style="margin: 40px;">'
             text += `<div>SLOT NUMBER:${bookingIndex}</div>`
@@ -877,6 +700,7 @@ function makedroppable(event) {
                         <div>${list.carNumber}</div>
                         `
             })
+
             text += `<div>total income:${cost}</div>`
             text += "</div>"
             infodiv.innerHTML = text;
